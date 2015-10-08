@@ -18,6 +18,10 @@
         "should": "1.0.0",
         "ejs": "*",
         "mongodb": "*",
-        "dnode": "*"
+        "dnode": "*",
+        "connect": "*",
+        "express-session": "*",
+        "socket.io": "*",
+        "cookie": "*"
     }
 }

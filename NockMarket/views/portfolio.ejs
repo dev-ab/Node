@@ -3,8 +3,7 @@
 <head>
 <meta charset="utf-8">
 <title>Nockmarket</title>
-<meta name="viewport"
-content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0-alpha/css/bootstrap.css" rel="stylesheet">
 <link href="http://spbooks.github.com/nodejs1/docs.css" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.js"></script>
@@ -12,8 +11,10 @@ content="width=device-width, initial-scale=1.0">
 <script type="text/javascript" src="http://spbooks.github.com/nodejs1/bootstrap-button.js"></script>
 <script type="text/javascript" src="http://spbooks.github.com/nodejs1/bootstrap-modal.js"></script>
 <script type="text/javascript" src="http://spbooks.github.com/nodejs1/bootstrap-transition.js"></script>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0-alpha/js/umd/tab.js"></script>
+<script type="text/javascript" src="https://netdna.bootstrapcdn.com/twitter-bootstrap/2.0.4/js/bootstrap-tab.js"></script>
 <script type="text/javascript" src="/js/portfolio.js"></script>
+<script type="text/javascript" src="/socket.io/socket.io.js"></script>
+<script type="text/javascript" src="/js/chat.js"></script>
 </head>
 <body>
 <div class="container">
@@ -25,6 +26,7 @@ content="width=device-width, initial-scale=1.0">
   <ul class="nav nav-tabs">
     <li class="active"><a href="#tab1" data-toggle="tab">Portfolio</a></li>
     <li><a href="#tab2" data-toggle="tab">Nockmarket</a></li>
+    <li><a href="#tab3" data-toggle="tab" id="chat-tab">Chat</a></li>
   </ul>
   <div class="tab-content" style="padding-bottom: 9px; border-bottom: 1px solid #ddd;">
     <div class="tab-pane active" id="tab1">
@@ -40,14 +42,19 @@ content="width=device-width, initial-scale=1.0">
           </tr>
         </thead>
         <tbody class="stock-list">
-<% for (var i=0; i<portfolio.length; i++) { %>
-<tr><td><%=portfolio[i]%></td><td><%=prices[i]%></td></tr>
-<% } %>
+            <% for (var i=0; i<portfolio.length; i++) { %>
+            <tr><td><%=portfolio[i]%></td><td><%=prices[i]%></td></tr>
+            <% } %>
         </tbody>
       </table>
     </div>
     <div class="tab-pane" id="tab2">
       <p>Howdy, I'm in Section 2.</p>
+    </div>
+    <div class="tab-pane" id="tab3">
+        <p><textarea class="input-xlarge span8 chat-widget" id="textarea" rows="20"></textarea></p>
+        <p><input type="text" class="input-xlarge span8 chat-widget" id="input01" placeholder="Enter your message"></p>
+        <p><button type="submit" class="btn btn-primary chat-widget" id="send-chat">Send</button></p>
     </div>
   </div>
 </div>

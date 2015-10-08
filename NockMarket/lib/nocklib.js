@@ -1,14 +1,46 @@
 'use strict';
-var crypto = require('crypto')
+var cookie = require('cookie')
+        , crypto = require('crypto')
         , db = require('./db')
         , exchange = require('./exchange')
+        , session = require('express-session')
         , http = require('http')
+        , MemoryStore = session.MemoryStore
         , ObjectID = require('mongodb').ObjectID
         , priceFloor = 35
         , priceRange = 10
         , volFloor = 80
         , volRange = 40;
+
+var sessionStore = new MemoryStore();
+var io;
+
 module.exports = {
+    createSocket: function (app) {
+        io = require('socket.io').listen(app);
+        io.configure(function () {
+            io.set('authorization', function (handshakeData, callback) {
+                if (handshakeData.headers.cookie) {
+                    handshakeData.cookie = cookie.parse(decodeURIComponent(handshakeData.headers.cookie));
+                    handshakeData.sessionID = handshakeData.cookie['connect.sid'];
+                    sessionStore.get(handshakeData.sessionID, function (err, session) {
+                        if (err || !session) {
+                            return callback(null, false);
+                        } else {
+                            handshakeData.session = session;
+                            console.log('session data', session);
+                            return callback(null, true);
+                        }
+                    });
+                } else {
+                    return callback(null, false);
+                }
+            });
+        });
+    },
+    getSessionStore: function () {
+        return sessionStore;
+    },
     addStock: function (uid, stock, callback) {
         function doCallback() {
             counter++;
@@ -50,7 +82,8 @@ module.exports = {
                 console.err('Error retrieving Yahoo stock prices');
                 throw err;
             }).on('end', function () {
-                var tokens = data.split('\r\n');
+                console.log(data);
+                var tokens = data.split('\n');
                 var prices = [];
                 tokens.forEach(function (line) {
                     var price = line.split(",")[1];

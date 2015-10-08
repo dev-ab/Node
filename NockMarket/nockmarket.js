@@ -44,7 +44,7 @@ app.use(bodyParser.urlencoded({
     extended: true
 }));
 app.use(cookieParser());
-app.use(session({secret: 'secretpasswordforsessions', resave: false, saveUninitialized: false}));
+app.use(session({secret: 'secretpasswordforsessions', resave: false, saveUninitialized: false, store: nocklib.getSessionStore()}));
 
 app.set('views', __dirname + '/views');
 app.set('view engine', 'ejs');
@@ -88,6 +88,7 @@ app.get('/api/trades', function (req, res) {
 
 
 db.open(function () {
+    nocklib.createSocket(app);
     submitRandomOrder();
     app.listen(3000);
 });
