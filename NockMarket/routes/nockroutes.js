@@ -25,8 +25,8 @@ module.exports = {
             if (user && user.portfolio)
                 portfolio = user.portfolio;
             nocklib.getStockPrices(portfolio, function (err, prices) {
-                res.render('portfolio', {portfolio: portfolio, prices: prices});
-            });
+             res.render('portfolio', {portfolio: portfolio, prices: prices});
+             });
         });
     },
     login: function (req, res) {

@@ -37,14 +37,18 @@ function submitRandomOrder() {
     }
 }
 var app = express();
-var bodyParser = require('body-parser')
-var cookieParser = require('cookie-parser')
-var session = require('express-session')
+var bodyParser = require('body-parser');
+var cookieParser = require('cookie-parser');
+var session = require('express-session');
+var cookie = require('cookie')
+        , MemoryStore = session.MemoryStore
+        , sessionStore = new MemoryStore();
+
 app.use(bodyParser.urlencoded({
     extended: true
 }));
 app.use(cookieParser());
-app.use(session({secret: 'secretpasswordforsessions', resave: false, saveUninitialized: false, store: nocklib.getSessionStore()}));
+app.use(session({secret: 'secretpasswordforsessions', resave: false, saveUninitialized: false, store: sessionStore}));
 
 app.set('views', __dirname + '/views');
 app.set('view engine', 'ejs');
@@ -86,9 +90,46 @@ app.get('/api/trades', function (req, res) {
     });
 });
 
+var server = http.createServer(app);
+var io = require('socket.io')(server);
 
 db.open(function () {
-    nocklib.createSocket(app);
+    //nocklib.createSocket(io);
+    io.use(function (socket, next) {
+        //console.log(socket.handshake);
+        var handshakeData = socket.handshake;
+        
+        console.log(handshakeData);
+        if (handshakeData.headers.cookie) {
+            handshakeData.cookie = cookie.parse(decodeURIComponent(handshakeData.headers.cookie));
+            handshakeData.sessionID = handshakeData.cookie['connect.sid'];
+            console.log(handshakeData.cookie);
+            console.log(handshakeData.sessionID);
+            console.log(sessionStore.sessions);
+            sessionStore.get(handshakeData.sessionID, function (err, session) {
+                if (err || !session) {
+                    console.log('no session');
+                    //next(new Error('not authorized'));
+                } else {
+                    handshakeData.session = session;
+                    console.log('session data', session);
+                    //next();
+                }
+            });
+        } else {
+            //next(new Error('not authorized'));
+        }
+        next();
+    });
     submitRandomOrder();
-    app.listen(3000);
+    server.listen(3000);
+
+    io.on('connection', function (socket) {
+        socket.emit('news', {hello: 'world'});
+        socket.on('my other event', function (data) {
+            console.log(data);
+        });
+    });
 });
+
+

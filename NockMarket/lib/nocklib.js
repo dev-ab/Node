@@ -13,29 +13,26 @@ var cookie = require('cookie')
         , volRange = 40;
 
 var sessionStore = new MemoryStore();
-var io;
 
 module.exports = {
-    createSocket: function (app) {
-        io = require('socket.io').listen(app);
-        io.configure(function () {
-            io.set('authorization', function (handshakeData, callback) {
-                if (handshakeData.headers.cookie) {
-                    handshakeData.cookie = cookie.parse(decodeURIComponent(handshakeData.headers.cookie));
-                    handshakeData.sessionID = handshakeData.cookie['connect.sid'];
-                    sessionStore.get(handshakeData.sessionID, function (err, session) {
-                        if (err || !session) {
-                            return callback(null, false);
-                        } else {
-                            handshakeData.session = session;
-                            console.log('session data', session);
-                            return callback(null, true);
-                        }
-                    });
-                } else {
-                    return callback(null, false);
-                }
-            });
+    createSocket: function (io) {
+        io.use(function (socket, next) {
+            var handshakeData = socket.request;
+            if (handshakeData.headers.cookie) {
+                handshakeData.cookie = cookie.parse(decodeURIComponent(handshakeData.headers.cookie));
+                handshakeData.sessionID = handshakeData.cookie['connect.sid'];
+                sessionStore.get(handshakeData.sessionID, function (err, session) {
+                    if (err || !session) {
+                        next(new Error('not authorized'));
+                    } else {
+                        handshakeData.session = session;
+                        console.log('session data', session);
+                        next();
+                    }
+                });
+            } else {
+                next(new Error('not authorized'));
+            }
         });
     },
     getSessionStore: function () {
@@ -82,7 +79,6 @@ module.exports = {
                 console.err('Error retrieving Yahoo stock prices');
                 throw err;
             }).on('end', function () {
-                console.log(data);
                 var tokens = data.split('\n');
                 var prices = [];
                 tokens.forEach(function (line) {
