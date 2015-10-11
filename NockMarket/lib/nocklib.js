@@ -13,26 +13,62 @@ var cookie = require('cookie')
         , volRange = 40;
 
 var sessionStore = new MemoryStore();
+var io;
+var online = [];
 
 module.exports = {
-    createSocket: function (io) {
+    createSocket: function (server) {
+        io = require('socket.io')(server);
         io.use(function (socket, next) {
-            var handshakeData = socket.request;
+            var handshakeData = socket.handshake;
             if (handshakeData.headers.cookie) {
                 handshakeData.cookie = cookie.parse(decodeURIComponent(handshakeData.headers.cookie));
                 handshakeData.sessionID = handshakeData.cookie['connect.sid'];
-                sessionStore.get(handshakeData.sessionID, function (err, session) {
+                var new_id = '';
+                for (var prop in sessionStore.sessions) {
+                    if (handshakeData.sessionID.indexOf(prop) > -1)
+                        new_id = prop;
+                }
+                sessionStore.get(new_id, function (err, session) {
                     if (err || !session) {
+                        console.log('no session');
                         next(new Error('not authorized'));
                     } else {
                         handshakeData.session = session;
-                        console.log('session data', session);
+                        //console.log('session data', session);
                         next();
                     }
                 });
             } else {
                 next(new Error('not authorized'));
             }
+        });
+
+        io.sockets.on('connection', function (socket) {
+            console.log('connected');
+            socket.on('joined', function (data) {
+                online.push(socket.handshake.session.username);
+                var message = socket.handshake.session.username + ': ' + data.message + '\n';
+                var message = 'Admin: ' + socket.handshake.session.username + ' has joined\n';
+                socket.emit('chat', {message: message, users: online});
+                socket.broadcast.emit('chat', {message: message, username: socket.handshake.session.username});
+            });
+            socket.on('clientchat', function (data) {
+                var message = socket.handshake.session.username + ': ' + data.message + '\n';
+                socket.emit('chat', {message: message});
+                socket.broadcast.emit('chat', {message: message});
+            });
+            socket.on('updateAccount', function (data) {
+                module.exports.updateEmail(socket.handshake.session._id, data.email, function (err, numUpdates) {
+                    socket.emit('updateSuccess', {});
+                });
+            });
+            socket.on('disconnect', function (data) {
+                var username = socket.handshake.session.username;
+                var index = online.indexOf(username);
+                online.splice(index, 1);
+                socket.broadcast.emit('dis', {username: username});
+            });
         });
     },
     getSessionStore: function () {
@@ -89,6 +125,12 @@ module.exports = {
                 callback(null, prices);
             });
         });
+    },
+    sendTrades: function (trades) {
+        io.sockets.emit('trade', JSON.stringify(trades));
+    },
+    updateEmail: function (id, email, callback) {
+        db.updateById('users', new ObjectID(id), {email: email}, callback);
     },
     createUser: function (username, email, password, callback) {
         var user = {username: username, email: email, password: encryptPassword(password)};

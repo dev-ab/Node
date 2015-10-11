@@ -9,55 +9,58 @@ var exchangeData = {}
         , nockroutes = require('./routes/nockroutes.js')
         , timeFloor = 500
         , timeRange = 1000;
-function submitRandomOrder() {
+var stocks = ['NOCK1', 'NOCK2', 'NOCK3', 'NOCK4', 'NOCK5'];
+var allData = [];
+stocks.forEach(function (stock) {
+    allData.push({});
+});
+function submitRandomOrder(index) {
+    var exchangeData = allData[index];
     // order
     var ord = nocklib.generateRandomOrder(exchangeData);
+    ord.stock = stocks[index];
     //console.log('order', ord);
     if (ord.type == exch.BUY)
-        exchangeData = exch.buy(ord.price, ord.volume, exchangeData);
+        allData[index] = exch.buy(ord.price, ord.volume, exchangeData);
     else
-        exchangeData = exch.sell(ord.price, ord.volume, exchangeData);
+        allData[index] = exch.sell(ord.price, ord.volume, exchangeData);
 
     db.insertOne('transactions', ord, function (err, order) {
         if (exchangeData.trades && exchangeData.trades.length > 0) {
             var trades = exchangeData.trades.map(function (trade) {
                 trade.init = (ord.type == exch.BUY) ? 'b' : 's';
+                trade.stock = stocks[index];
                 return trade;
             });
+            nocklib.sendTrades(trades);
             db.insert('transactions', trades, function (err, trades) {
                 pauseThenTrade();
             });
-        } else
+        } else {
             pauseThenTrade();
+        }
     });
     function pauseThenTrade() {
         var pause = Math.floor(Math.random() * timeRange) + timeFloor;
-        setTimeout(submitRandomOrder, pause);
+        setTimeout(submitRandomOrder.bind(this, index), pause);
         //console.log(exch.getDisplay(exchangeData));
     }
 }
 var app = express();
+var server = http.createServer(app);
 var bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser');
 var session = require('express-session');
-var cookie = require('cookie')
-        , MemoryStore = session.MemoryStore
-        , sessionStore = new MemoryStore();
+var cookie = require('cookie');
 
-app.use(bodyParser.urlencoded({
-    extended: true
-}));
+app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser());
-app.use(session({secret: 'secretpasswordforsessions', resave: false, saveUninitialized: false, store: sessionStore}));
+app.use(session({secret: 'secretpasswordforsessions', resave: false, saveUninitialized: false, store: nocklib.getSessionStore()}));
+app.use(express.static(__dirname + '/public'));
 
 app.set('views', __dirname + '/views');
 app.set('view engine', 'ejs');
-app.use(express.static(__dirname + '/public'));
-
-app.set('view options', {
-    layout: false
-});
-
+app.set('view options', {layout: false});
 
 app.get('/', nockroutes.getIndex);
 app.get('/api/user/:username', nockroutes.getUser);
@@ -90,46 +93,16 @@ app.get('/api/trades', function (req, res) {
     });
 });
 
-var server = http.createServer(app);
-var io = require('socket.io')(server);
+
 
 db.open(function () {
-    //nocklib.createSocket(io);
-    io.use(function (socket, next) {
-        //console.log(socket.handshake);
-        var handshakeData = socket.handshake;
-        
-        console.log(handshakeData);
-        if (handshakeData.headers.cookie) {
-            handshakeData.cookie = cookie.parse(decodeURIComponent(handshakeData.headers.cookie));
-            handshakeData.sessionID = handshakeData.cookie['connect.sid'];
-            console.log(handshakeData.cookie);
-            console.log(handshakeData.sessionID);
-            console.log(sessionStore.sessions);
-            sessionStore.get(handshakeData.sessionID, function (err, session) {
-                if (err || !session) {
-                    console.log('no session');
-                    //next(new Error('not authorized'));
-                } else {
-                    handshakeData.session = session;
-                    console.log('session data', session);
-                    //next();
-                }
-            });
-        } else {
-            //next(new Error('not authorized'));
-        }
-        next();
-    });
-    submitRandomOrder();
+    nocklib.createSocket(server);
     server.listen(3000);
+    for (var i = 0; i < stocks.length; i++) {
+        submitRandomOrder(i);
+    }
 
-    io.on('connection', function (socket) {
-        socket.emit('news', {hello: 'world'});
-        socket.on('my other event', function (data) {
-            console.log(data);
-        });
-    });
+
 });
 
 
