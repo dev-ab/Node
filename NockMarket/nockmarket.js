@@ -32,7 +32,9 @@ function submitRandomOrder(index) {
                 trade.stock = stocks[index];
                 return trade;
             });
-            nocklib.sendTrades(trades);
+            //nocklib.sendTrades(trades);
+            console.log(trades);
+            nocklib.sendExchangeData(stocks[index], exchangeData);
             db.insert('transactions', trades, function (err, trades) {
                 pauseThenTrade();
             });
@@ -52,6 +54,7 @@ var bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser');
 var session = require('express-session');
 var cookie = require('cookie');
+var errorHandler = require('errorhandler');
 
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser());
@@ -61,6 +64,15 @@ app.use(express.static(__dirname + '/public'));
 app.set('views', __dirname + '/views');
 app.set('view engine', 'ejs');
 app.set('view options', {layout: false});
+
+if ('development' == app.get('env')) {
+    app.use(errorHandler({dumpExceptions: true, showStack: true}));
+}
+if ('production' == app.get('env')) {
+    app.use(errorHandler());
+}
+
+
 
 app.get('/', nockroutes.getIndex);
 app.get('/api/user/:username', nockroutes.getUser);
@@ -97,7 +109,8 @@ app.get('/api/trades', function (req, res) {
 
 db.open(function () {
     nocklib.createSocket(server);
-    server.listen(3000);
+    var port = process.env.PORT || 3000;
+    server.listen(port);
     for (var i = 0; i < stocks.length; i++) {
         submitRandomOrder(i);
     }
@@ -106,3 +119,6 @@ db.open(function () {
 });
 
 
+app.use(function (req, res) {
+    res.render('404');
+});

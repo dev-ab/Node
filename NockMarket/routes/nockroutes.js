@@ -9,6 +9,7 @@ module.exports = {
         }
     },
     getIndex: function (req, res) {
+        throw new Error('dummy error');
         res.render('index');
     },
     getUser: function (req, res) {

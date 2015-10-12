@@ -15,6 +15,7 @@ var cookie = require('cookie')
 var sessionStore = new MemoryStore();
 var io;
 var online = [];
+var lastExchangeData = {};
 
 module.exports = {
     createSocket: function (server) {
@@ -57,6 +58,9 @@ module.exports = {
                 var message = socket.handshake.session.username + ': ' + data.message + '\n';
                 socket.emit('chat', {message: message});
                 socket.broadcast.emit('chat', {message: message});
+            });
+            socket.on('requestData', function (data) {
+                socket.emit('initExchangeData', {exchangeData: transformExchangeData(lastExchangeData)});
             });
             socket.on('updateAccount', function (data) {
                 module.exports.updateEmail(socket.handshake.session._id, data.email, function (err, numUpdates) {
@@ -126,6 +130,11 @@ module.exports = {
             });
         });
     },
+    sendExchangeData: function (stock, exchangeData) {
+        lastExchangeData[stock] = exchangeData;
+        var current = transformStockData(stock, exchangeData);
+        io.sockets.emit('exchangeData', current);
+    },
     sendTrades: function (trades) {
         io.sockets.emit('trade', JSON.stringify(trades));
     },
@@ -176,9 +185,63 @@ module.exports = {
             order.price -= shift;
         order.volume = Math.floor(Math.random() * volRange) + volFloor;
         return order;
-    }
+    },
 }
 
 function encryptPassword(plainText) {
     return crypto.createHash('md5').update(plainText).digest('hex');
+}
+function transformExchangeData(data) {
+    var transformed = [];
+    for (var stock in data) {
+        var existingData = data[stock];
+        var newData = transformStockData(stock, existingData);
+        transformed.push(newData);
+    }
+    return transformed;
+}
+function transformStockData(stock, existingData) {
+    var newData = {};
+    newData.st = stock;
+    if (existingData && existingData.trades && existingData.trades.length > 0) {
+        newData.tp = existingData.trades[0].price;
+        newData.tv = existingData.trades[0].volume;
+    }
+
+    var buyPrices = {};
+    var askPrices = {};
+    if (existingData && existingData.buys) {
+        buyPrices = Object.keys(existingData.buys.volumes);
+        for (var i = buyPrices.length - 5; i < buyPrices.length; i++) {
+            var index = buyPrices.length - i;
+            newData['b' + index + 'p'] = buyPrices[i];
+            newData['b' + index + 'v'] = existingData.buys.volumes[buyPrices[i]];
+        }
+    }
+    if (existingData && existingData.sells) {
+        askPrices = Object.keys(existingData.sells.volumes);
+        for (var i = 0; i < 5; i++) {
+            var index = i + 1;
+            newData['a' + index + 'p'] = askPrices[i];
+            newData['a' + index + 'v'] = existingData.sells.volumes[askPrices[i]];
+        }
+    }
+
+    for (var i = 1; i <= 5; i++) {
+        if (!newData['b' + i + 'p']) {
+            newData['b' + i + 'p'] = 0;
+            newData['b' + i + 'v'] = 0;
+        }
+        if (!newData['a' + i + 'p']) {
+            newData['a' + i + 'p'] = 0;
+            newData['a' + i + 'v'] = 0;
+        }
+        if (!newData['tv']) {
+            newData['tv'] = 0;
+        }
+        if (!newData['tp']) {
+            newData['tp'] = 0;
+        }
+    }
+    return newData;
 }

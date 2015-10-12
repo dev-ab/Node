@@ -3,8 +3,8 @@ var Db = require('mongodb').Db
         , Server = require('mongodb').Server;
 var envHost = process.env['MONGO_NODE_DRIVER_HOST']
         , envPort = process.env['MONGO_NODE_DRIVER_PORT']
-        , host = envHost != null ? envHost : '127.0.0.1'
-        , port = envPort != null ? envPort : 27017;//Connection.DEFAULT_PORT;
+        , host = $OPENSHIFT_MONGODB_DB_HOST != null ? $OPENSHIFT_MONGODB_DB_HOST : envHost != null ? envHost : '127.0.0.1'
+        , port = $OPENSHIFT_MONGODB_DB_PORT != null ? $OPENSHIFT_MONGODB_DB_PORT : envPort != null ? envPort : 27017;//Connection.DEFAULT_PORT;
 var db = new Db('nockmarket', new Server(host, port, {}), {native_parser: false});
 
 module.exports = {
