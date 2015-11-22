@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Abstract</title>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" integrity="sha512-dTfge/zgoMYpP7QbHy4gWMEGsbsdZeCXz7irItjcC3sPUFtf0kuFbDz/ixG7ArTxmDjLXDmezHubeNikyKGVyQ==" crossorigin="anonymous">
+        <link href='https://fonts.googleapis.com/css?family=Orbitron' rel='stylesheet' type='text/css'>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.0.0-alpha1/jquery.min.js"></script>
+        <script src="typed.js/js/typed.js"></script>
+        <script>
+            $(function () {
+                $(".typed").typed({
+                    strings: ["Abstract"],
+                    typeSpeed: 90,
+                    cursorChar: "_",
+                    callback: function () {
+                        $('h1 .typed-cursor').remove();
+                        $(".typed1").typed({
+                            strings: ["Creating innovative solutions"],
+                            typeSpeed: 50,
+                            showCursor: true,
+                            cursorChar: "_"
+                        });
+                    },
+                });
+
+
+            });
+        </script>
+        <style>
+            .typed-cursor{
+                opacity: 1;
+                -webkit-animation: blink 0.7s infinite;
+                -moz-animation: blink 0.7s infinite;
+                animation: blink 0.7s infinite;
+            }
+            @keyframes blink{
+                0% { opacity:1; }
+                50% { opacity:0; }
+                100% { opacity:1; }
+            }
+            @-webkit-keyframes blink{
+                0% { opacity:1; }
+                50% { opacity:0; }
+                100% { opacity:1; }
+            }
+            @-moz-keyframes blink{
+                0% { opacity:1; }
+                50% { opacity:0; }
+                100% { opacity:1; }
+            }
+        </style>
+
+    </head>
+
+    <body>
+        <div class="container">
+            <div class="jumpotron" style="font-family: 'Orbitron', sans-serif;">
+                <h1><span class="typed"></span></h1>
+                <h3><span class="typed1"></span></h3>
+            </div>
+        </div>
+    </body>
+
+</html>
