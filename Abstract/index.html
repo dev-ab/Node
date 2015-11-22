@@ -3,7 +3,7 @@
     <head>
         <meta charset="UTF-8">
         <title>Abstract</title>
-        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" integrity="sha512-dTfge/zgoMYpP7QbHy4gWMEGsbsdZeCXz7irItjcC3sPUFtf0kuFbDz/ixG7ArTxmDjLXDmezHubeNikyKGVyQ==" crossorigin="anonymous">
+        <link rel="stylesheet" href="css/bootstrap.min.css" rel='stylesheet' type='text/css'>
         <link href='https://fonts.googleapis.com/css?family=Orbitron' rel='stylesheet' type='text/css'>
 
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.0.0-alpha1/jquery.min.js"></script>
@@ -12,13 +12,13 @@
             $(function () {
                 $(".typed").typed({
                     strings: ["Abstract"],
-                    typeSpeed: 90,
+                    typeSpeed: 20,
                     cursorChar: "_",
                     callback: function () {
                         $('h1 .typed-cursor').remove();
                         $(".typed1").typed({
                             strings: ["Creating innovative solutions"],
-                            typeSpeed: 50,
+                            typeSpeed: 20,
                             showCursor: true,
                             cursorChar: "_"
                         });
@@ -29,6 +29,17 @@
             });
         </script>
         <style>
+            body{
+                background-color: #fff;
+            }
+            .menue-items{
+                font-size: 15px;
+                font-family: 'Orbitron', sans-serif;
+            }
+            .radius {
+                -moz-border-radius: 5px;
+                border-radius: 10px;
+            }
             .typed-cursor{
                 opacity: 1;
                 -webkit-animation: blink 0.7s infinite;
@@ -55,10 +66,33 @@
     </head>
 
     <body>
-        <div class="container">
-            <div class="jumpotron" style="font-family: 'Orbitron', sans-serif;">
-                <h1><span class="typed"></span></h1>
-                <h3><span class="typed1"></span></h3>
+        <div class="container radius" style="margin-top:5%;background-color: #f7f7f7;">
+            <div class="row">
+                <div class="col-md-2" style="height:400px;border-right: 1px groove black;margin:10px;">
+asdas
+                </div>
+
+                <div class="col-md-8">
+                    <div class="row">
+                        <div class="col-md-12" style="margin-top: 10px; border: 1px solid black">
+                            <ul class="list-inline menue-items">
+                                <li class="active">Home</li>
+                                <li>About</li>
+                                <li>Services</li>
+                                <li>Request Service</li>
+                                <li>Contact</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12" style="margin-bottom: 5%;height:400px;border: 1px solid black">
+                            <div class="jumpotron" style="font-family: 'Orbitron', sans-serif;">
+                                <h1><span class="typed"></span></h1>
+                                <h3><span class="typed1"></span></h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </body>
