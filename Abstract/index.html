@@ -1,68 +1,88 @@
 <!DOCTYPE html>
-<html>
+<html ng-app="abstract">
     <head>
         <meta charset="UTF-8">
         <title>Abstract</title>
+        <link rel="stylesheet" href="css/normalize.css" rel='stylesheet' type='text/css'>
         <link rel="stylesheet" href="css/bootstrap.min.css" rel='stylesheet' type='text/css'>
         <link rel="stylesheet" href="css/style.css" rel='stylesheet' type='text/css'>
         <link href='https://fonts.googleapis.com/css?family=Orbitron' rel='stylesheet' type='text/css'>
-
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.0.0-alpha1/jquery.min.js"></script>
-        <script src="typed.js/js/typed.js"></script>
-        <script>
-            $(function () {
-                $(".typed").typed({
-                    strings: ["Abstract"],
-                    typeSpeed: 40,
-                    cursorChar: "_",
-                    callback: function () {
-                        $('h1 .typed-cursor').remove();
-                        $(".typed1").typed({
-                            strings: ["Creating innovative solutions"],
-                            typeSpeed: 0,
-                            showCursor: true,
-                            cursorChar: "_"
-                        });
-                    },
-                });
-
-
-            });
-        </script>
+        <link href='https://fonts.googleapis.com/css?family=Alegreya' rel='stylesheet' type='text/css'>
+        <link href='css/font-awesome.min.css' rel='stylesheet' type='text/css'>
     </head>
-    <body>
+    <body ng-controller="appCtrl">
         <div class="container-fluid radius editor">
             <div class="row-fluid">
-                <div class="col hidden-xs col-sm-1 col-md-2 fill-height" style="border-right: 1px groove black;">
-                    asdas
+                <div class="col hidden-xs hidden-sm col-sm-1 col-md-2 fill-height" style="border-left: solid 1px;border-right: 1px groove black;">
+                    <div class="row fill-height" style="margin-top: 10%">
+                        <div class="col col-xs-12 col-sm-12 col-md-12 menu-items-container" style="border-bottom: solid 1px;">
+                            <ul class="list-inline menu-items">
+                                <li>Pages</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="row fill-height" style="font-size: 12px;background-color: #fff;">
+                        <div class="col col-xs-12 col-sm-12 col-md-12 menu-items-container" style="font-family: 'Orbitron', sans-serif;">
+                            <a href="javascript:;" ng-click="selectPage('home')"><div ng-class="pages['home'].selected?'selected':''"><i class="fa fa-folder ico-blue"></i> Abstract</div></a>
+                            <div style="border-left:dotted 1px;">
+                                <div style="width:10px;height:10px;border-bottom:dotted 1px;float:left;"></div>
+                                <a href="javascript:;" ng-click="selectPage('about')"><div ng-class="pages['about'].selected?'selected':''"><i class="fa fa-file ico-blue"></i> About</div></a>
+                                <div style="width:10px;height:10px;border-bottom:dotted 1px;float:left;"></div>
+                                <div ng-class="pages['services'].selected?'selected':''"><i class="fa fa-file ico-blue"></i> Services</div>
+                                <div style="width:10px;height:10px;border-bottom:dotted 1px;float:left;"></div>
+                                <div ng-class="pages['contact'].selected?'selected':''"><i class="fa fa-file ico-blue"></i> Contact</div>
+                            </div>
+                            <div style="width:10px;height:10px;border-left:dotted 1px;border-bottom:dotted 1px;float:left;"></div>
+                            <div ng-class="pages['request_service'].selected?'selected':''"><i class="fa fa-file ico-blue"></i> Request Service</div>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="col col-xs-12 col-sm-10 col-md-10 fill-height">
                     <div class="row fill-height">
                         <div class="col col-xs-12 col-sm-12 col-md-12 menu-items-container">
-                            <ul class="list-inline menu-items">
-                                <li class="active">Home</li>
-                                <li>About</li>
-                                <li>Services</li>
-                                <li>Request Service</li>
-                                <li>Contact</li>
+                            <ul class="list-inline menu-items hidden-md hidden-lg">
+                                <li ng-class="pages['home'].selected?'active':''"><span class="fa fa-home ico-blue"></span> Home</li>
+                                <li ng-class="pages['about'].selected?'active':''"><span class="fa fa-info-circle ico-blue"></span> About</li>
+                                <li ng-class="pages['services'].selected?'active':''"><span class="fa fa-briefcase ico-blue"></span> Services</li>
+                                <li ng-class="pages['contact'].selected?'active':''"><span class="fa fa-question-circle ico-blue"></span> Contact</li>
+                                <li ng-class="pages['request_service'].selected?'active':''"><span class="fa fa-wpforms ico-blue"></span> Request Service</li>
+                                <li ng-class="pages['projects'].selected?'active':''"><span class="fa fa-area-chart ico-blue"></span> Projects</li>
+                            </ul>
+                            <ul class="list-inline menu-items hidden-xs hidden-sm">
+                                <li ng-class="pages['home'].selected?'active':''"><span class="fa fa-home ico-blue"></span> Home</li>
+                                <li ng-class="pages['projects'].selected?'active':''"><span class="fa fa-area-chart ico-blue"></span> Projects</li>
                             </ul>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col col-xs-12 col-sm-12 col-md-12 editor-box fill-height">
-                            <div style="overflow: hidden;width:5%;float: left;">
-                                asdsadsadsadasd
-                            </div>
-                            <div class="jumpotron editor-area">
-                                <h1><span class="typed"></span></h1>
-                                <h3><span class="typed1"></span></h3>
+                            <div class="row">
+                                <div class="liner">
+                                    <ol style="float: right;">
+                                        <li ng-repeat="i in result"></li>
+                                    </ol>
+                                </div>
+                                <div class="jumpotron editor-area">
+                                    <div ng-show="pages['home'].selected">
+                                        <h1><i class="fa fa-home ico-red"></i><span id="home_title"></span></h1>
+                                        <blockquote><span id="home_body"></span></blockquote>
+                                    </div>
+                                    <div ng-show="pages['about'].selected">
+                                        <h3><i class="fa fa-info-circle ico-blue"></i> About Abstract</h3>
+                                        <blockquote><span id="about_p1"></span></blockquote>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+        <script src="js/pace.min.js"></script>
+        <script src="js/jquery.min.js"></script>
+        <script src="js/typed.js"></script>
+        <script src="js/angular.min.js"></script>
+        <script src="js/app.js"></script>
     </body>
-
 </html>
